@@ -368,8 +368,6 @@ class UserRepositoryImpl @Inject constructor(
                 .document(uid)
                 .collection("planned")
                 .document(titleId)
-
-
             watchingRef.set(title)
                 .addOnSuccessListener {
 
@@ -400,8 +398,8 @@ class UserRepositoryImpl @Inject constructor(
                 .addOnFailureListener { e ->
                     Log.e("planned", "Failed to add title to watching list", e)
                 }
-
     }
+
 
     override fun addTitleToCompletedList(title: Title) {
         val uid = auth.currentUser?.uid ?: return

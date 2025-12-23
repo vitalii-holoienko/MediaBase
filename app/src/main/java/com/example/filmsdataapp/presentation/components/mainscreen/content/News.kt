@@ -115,8 +115,6 @@ fun News(news : List<News>?, viewModel : MainActivityViewModel){
                     Spacer(modifier = Modifier.height(50.dp))
                 }
             }
-        }else{
-            Log.d("TEKKEN", "NULL")
         }
     }
 }

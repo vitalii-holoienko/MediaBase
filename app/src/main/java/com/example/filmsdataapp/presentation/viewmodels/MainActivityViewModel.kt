@@ -503,15 +503,12 @@ class MainActivityViewModel @Inject constructor(
 
     private val userImageUri = mutableStateOf<Uri?>(null)
 
-    //TODO USECASE
     fun loadUserImage() {
         firebaseAuth.currentUser?.reload()?.addOnCompleteListener {
             val photoUrl = firebaseAuth.currentUser?.photoUrl
             userImageUri.value = photoUrl ?: Uri.parse("android.resource://com.example.filmsdataapp/${R.drawable.user_icon}")
         }
     }
-
-    //LOGIC CONNECTED WITH PHONE NUMBER AUTHENTICATION
 
     fun startPhoneNumberVerification(activity: Activity) {
 
@@ -549,7 +546,6 @@ class MainActivityViewModel @Inject constructor(
         firebaseAuth.signInWithCredential(credential)
             .addOnCompleteListener{ task ->
                 if (task.isSuccessful) {
-                    Log.d("TEKKEN", "signInWithCredential:success")
                     val isNewUser = task.result?.additionalUserInfo?.isNewUser == true
                     if (isNewUser) {
                         onCreateProfileClicked()
@@ -562,13 +558,9 @@ class MainActivityViewModel @Inject constructor(
                     userSuccessfullySignedIn.value = true
 
                 } else {
-                    // Sign in failed, display a message and update the UI
-                    Log.w("DEBUG", "signInWithCredential:failure", task.exception)
-
                     if (task.exception is FirebaseAuthInvalidCredentialsException) {
                         // The verification code entered was invalid
                     }
-                    // Update UI
                 }
             }
     }
@@ -598,7 +590,7 @@ class MainActivityViewModel @Inject constructor(
                 credentialManager?.clearCredentialState(clearRequest)
 
             } catch (e: ClearCredentialException) {
-                Log.e("TEKKEN", "Couldn't clear user credentials: ${e.localizedMessage}")
+                Log.e("DEBUG", "Couldn't clear user credentials: ${e.localizedMessage}")
             }
         }
 
@@ -636,8 +628,6 @@ class MainActivityViewModel @Inject constructor(
     }
 
     private fun applyFiltersLogic(movies: List<Title>, filter: FilterStatus): List<Title> {
-        Log.d("DEBUG", "Total before filters: ${movies.size}")
-
         val afterGenre = movies.filter { movie ->
             val selectedGenres = filter.genre
                 ?.mapNotNull { filter.genres[it]?.lowercase() }
@@ -650,14 +640,12 @@ class MainActivityViewModel @Inject constructor(
                 true //
             }
         }
-        Log.d("DEBUG", "After genre filter: ${afterGenre.size}")
 
         val afterRating = afterGenre.filter { movie ->
             filter.averageRationFrom?.let { from ->
                 movie.averageRating?.toInt()?.let { it >= from } ?: false
             } ?: true
         }
-        Log.d("DEBUG", "After rating filter: ${afterRating.size}")
 
         val afterDate = afterRating.filter { movie ->
             val year = movie.startYear
@@ -665,7 +653,6 @@ class MainActivityViewModel @Inject constructor(
             val toOk = filter.dateOfReleaseTo?.let { year != null && year <= it } ?: true
             fromOk && toOk
         }
-        Log.d("DEBUG", "After date filter: ${afterDate.size}")
 
         val result = afterDate.sortedWith { a, b ->
             when (filter.sortedBy) {
@@ -677,8 +664,6 @@ class MainActivityViewModel @Inject constructor(
                 null -> 0
             }
         }
-
-        Log.d("DEBUG", "Final result: ${result.size}")
         return result
     }
 
@@ -692,10 +677,10 @@ class MainActivityViewModel @Inject constructor(
                 // Sign in to Firebase with using the token
                 firebaseAuthWithGoogle(googleIdTokenCredential.idToken, componentActivity)
             } else {
-                Log.w("TEKKEN", "Credential is not of type Google ID!")
+                Log.w("DEBUG", "Credential is not of type Google ID!")
             }
         }catch (e : Exception){
-            Log.w("TEKKEN", e)
+            Log.w("DEBUG", e)
         }
 
     }
@@ -716,7 +701,7 @@ class MainActivityViewModel @Inject constructor(
                 if (task.isSuccessful) {
                     onMainClicked()
                 } else {
-                    Log.d("TEKKEN", "signInWithEmail:failure", task.exception)
+                    Log.d("DEBUG", "signInWithEmail:failure", task.exception)
                 }
             }.addOnFailureListener {
 
@@ -724,7 +709,7 @@ class MainActivityViewModel @Inject constructor(
     }
 
 
-    fun firebaseAuthWithGoogle(idToken: String, componentActivity: ComponentActivity) {
+    private fun firebaseAuthWithGoogle(idToken: String, componentActivity: ComponentActivity) {
         try{
             val credential = GoogleAuthProvider.getCredential(idToken, null)
             firebaseAuth.signInWithCredential(credential)
